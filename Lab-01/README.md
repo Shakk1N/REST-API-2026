@@ -41,4 +41,4 @@ Framework Core і міграцій.
 * `"ix_exercises_name" UNIQUE, btree (name)`
 
 ## Граф залежностей
-![img.png](img.png)
+![alt text](docs/images/img.png)
