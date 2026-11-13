@@ -1,65 +1,43 @@
-﻿using Application.Common.Interfaces;
+using Application.Common.Interfaces;
 using Domain.Exercises;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories;
 
-public class ExerciseRepository : IExerciseRepository
+public class ExerciseRepository(ApplicationDbContext context) : IExerciseRepository
 {
-    private readonly List<Exercise> _exercises = [];
-
-    public Task<IReadOnlyList<Exercise>> GetAll(CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<Exercise>> GetAll(CancellationToken cancellationToken)
     {
-        lock (_exercises)
-        {
-            return Task.FromResult<IReadOnlyList<Exercise>>(_exercises.ToList());
-        }
+        return await context.Exercises.ToListAsync(cancellationToken);
     }
 
-    public Task<Exercise?> GetById(Guid id, CancellationToken cancellationToken)
+    public async Task<Exercise?> GetById(Guid id, CancellationToken cancellationToken)
     {
-        lock (_exercises)
-        {
-            return Task.FromResult(_exercises.FirstOrDefault(x => x.Id == id));
-        }
+        return await context.Exercises.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 
-    public Task<Exercise?> GetByName(string name, CancellationToken cancellationToken)
+    public async Task<Exercise?> GetByName(string name, CancellationToken cancellationToken)
     {
-        lock (_exercises)
-        {
-            var exercise = _exercises.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
-            return Task.FromResult(exercise);
-        }
+        return await context.Exercises.FirstOrDefaultAsync(x => x.Name == name, cancellationToken);
     }
 
-    public Task<Exercise> Add(Exercise exercise, CancellationToken cancellationToken)
+    public async Task<Exercise> Add(Exercise exercise, CancellationToken cancellationToken)
     {
-        lock (_exercises)
-        {
-            _exercises.Add(exercise);
-            return Task.FromResult(exercise);
-        }
+        await context.Exercises.AddAsync(exercise, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
+        return exercise;
     }
 
-    public Task<Exercise> Update(Exercise exercise, CancellationToken cancellationToken)
+    public async Task<Exercise> Update(Exercise exercise, CancellationToken cancellationToken)
     {
-        lock (_exercises)
-        {
-            var index = _exercises.FindIndex(x => x.Id == exercise.Id);
-            if (index != -1)
-            {
-                _exercises[index] = exercise;
-            }
-            return Task.FromResult(exercise);
-        }
+        context.Exercises.Update(exercise);
+        await context.SaveChangesAsync(cancellationToken);
+        return exercise;
     }
 
-    public Task Delete(Exercise exercise, CancellationToken cancellationToken)
+    public async Task Delete(Exercise exercise, CancellationToken cancellationToken)
     {
-        lock (_exercises)
-        {
-            _exercises.RemoveAll(x => x.Id == exercise.Id);
-        }
-        return Task.CompletedTask;
+        context.Exercises.Remove(exercise);
+        await context.SaveChangesAsync(cancellationToken);
     }
 }
