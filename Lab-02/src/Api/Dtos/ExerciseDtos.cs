@@ -23,15 +23,15 @@ public record ExerciseDto(
 }
 
 public record CreateExerciseDto(
-    [Required, MaxLength(255)] string Name,
-    [Range(0.01, 10000)] decimal CaloriesPerHour,
-    bool RequiresEquipment,
-    MuscleGroup MuscleGroup
+     string Name,
+     decimal CaloriesPerHour,
+     bool RequiresEquipment,
+     MuscleGroup MuscleGroup
 );
 
 public record UpdateExerciseDto(
-    [Required, MaxLength(255)] string Name,
-    [Range(0.01, 10000)] decimal CaloriesPerHour,
-    bool RequiresEquipment,
-    MuscleGroup MuscleGroup
+     string Name,
+     decimal CaloriesPerHour,
+     bool RequiresEquipment,
+     MuscleGroup MuscleGroup
 );

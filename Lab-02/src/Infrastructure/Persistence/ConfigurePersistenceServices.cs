@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using Application.Common.Interfaces.Queries;
 
 namespace Infrastructure.Persistence;
 
@@ -36,5 +37,12 @@ public static class ConfigurePersistenceServices
     {
         services.AddScoped<ExerciseRepository>();
         services.AddScoped<IExerciseRepository>(provider => provider.GetRequiredService<ExerciseRepository>());
+    }
+
+    private static void AddRepositories(this IServiceCollection services)
+    {
+        services.AddScoped<ExerciseRepository>();
+        services.AddScoped<IExerciseRepository>(provider => provider.GetRequiredService<ExerciseRepository>());
+        services.AddScoped<IExerciseQueries>(provider => provider.GetRequiredService<ExerciseRepository>());
     }
 }

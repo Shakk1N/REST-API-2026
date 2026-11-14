@@ -1,0 +1,27 @@
+using Application.Common.Interfaces.Repositories;
+using MediatR;
+
+namespace Application.Exercises.Commands;
+
+public record DeleteExerciseCommand : IRequest<bool>
+{
+    public required Guid ExerciseId { get; init; }
+}
+
+public class DeleteExerciseCommandHandler(IExerciseRepository exerciseRepository)
+    : IRequestHandler<DeleteExerciseCommand, bool>
+{
+    public async Task<bool> Handle(
+        DeleteExerciseCommand request,
+        CancellationToken cancellationToken)
+    {
+        var exercise = await exerciseRepository.GetById(request.ExerciseId, cancellationToken);
+        if (exercise is null)
+        {
+            return false;
+        }
+
+        await exerciseRepository.Delete(exercise, cancellationToken);
+        return true;
+    }
+}

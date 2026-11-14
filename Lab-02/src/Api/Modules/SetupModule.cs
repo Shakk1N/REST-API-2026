@@ -1,3 +1,5 @@
+using Api.Modules.Errors;
+
 namespace Api.Modules;
 
 public static class SetupModule
@@ -16,6 +18,12 @@ public static class SetupModule
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials()));
+    }
+
+    public static void SetupServices(this IServiceCollection services)
+    {
+        services.AddControllers(options => options.Filters.Add<ValidationExceptionFilter>());
+        services.AddCors();
     }
 }
 
