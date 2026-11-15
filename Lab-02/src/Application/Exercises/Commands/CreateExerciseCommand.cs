@@ -1,24 +1,55 @@
-using Application.Common.Interfeces.Repositorieses;
+using Application.Common.Interfaces.Repositories;
+using Application.Exercises.Exceptions;
 using Domain.Exercises;
+using LanguageExt;
 using MediatR;
-namespace ;
-public record CreateExerciseCommand : IRequest<Exercise>
+
+namespace Application.Exercises.Commands;
+
+public record CreateExerciseCommand : IRequest<Either<ExerciseException, Exercise>>
 {
-public required string Title { get; init; }
-public required decimal Price { get; init; }
+    public required string Name { get; init; }
+    public required decimal CaloriesPerHour { get; init; }
+    public required bool RequiresEquipment { get; init; }
+    public required MuscleGroup MuscleGroup { get; init; }
 }
-public class CreateProductCommandHandler(IProductRepository productRepository)
-: IRequestHandler<CreateProductCommand, Product>
+
+public class CreateExerciseCommandHandler(IExerciseRepository exerciseRepository)
+    : IRequestHandler<CreateExerciseCommand, Either<ExerciseException, Exercise>>
 {
-public async Task<Product> Handle(CreateProductCommand request,
-CancellationToken cancellationToken)
-{
-var existingProduct = await productRepository.GetByTitle(request.Title, cancellationToken);
-if (existingProduct is not null)
-{
-throw new ArgumentException($"Product with title '{request.Title}'already exists");
-}
-var product = Product.New(Guid.NewGuid(), request.Title, request.Price);
-return await productRepository.Add(product, cancellationToken);
-}
+    public async Task<Either<ExerciseException, Exercise>> Handle(
+        CreateExerciseCommand request,
+        CancellationToken cancellationToken
+    )
+    {
+        var existing = await exerciseRepository.GetByName(request.Name, cancellationToken);
+
+        return await existing.MatchAsync(
+            e => new ExerciseAlreadyExistsException(e.Id),
+            () => CreateEntity(request, cancellationToken)
+        );
+    }
+
+    private async Task<Either<ExerciseException, Exercise>> CreateEntity(
+        CreateExerciseCommand request,
+        CancellationToken cancellationToken
+    )
+    {
+        try
+        {
+            var exercise = Exercise.New(
+                ExerciseId.New(),
+                request.Name,
+                request.CaloriesPerHour,
+                request.RequiresEquipment,
+                request.MuscleGroup
+            );
+
+            return await exerciseRepository.Add(exercise, cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            return new ExerciseUnhandledException(ExerciseId.Empty(), exception);
+        }
+    }
 }

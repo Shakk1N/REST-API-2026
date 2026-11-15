@@ -7,6 +7,7 @@ public class UpdateExerciseCommandValidator : AbstractValidator<UpdateExerciseCo
     public UpdateExerciseCommandValidator()
     {
         RuleFor(x => x.Name).NotEmpty().MinimumLength(3).MaximumLength(255);
+        RuleFor(x => x.CaloriesPerHour).InclusiveBetween(1m, 5000m);
         RuleFor(x => x.MuscleGroup).IsInEnum();
     }
 }

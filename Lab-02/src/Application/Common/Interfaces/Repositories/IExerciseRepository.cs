@@ -1,12 +1,12 @@
-﻿using Domain.Exercises;
+using Domain.Exercises;
+using LanguageExt;
 
-namespace Application.Common.Interfac.Repositorieses;
+namespace Application.Common.Interfaces.Repositories;
 
 public interface IExerciseRepository
 {
-    Task<Exercise?> GetById(Guid id, CancellationToken cancellationToken);
-    Task<Exercise?> GetByName(string name, CancellationToken
-        cancellationToken);
+    Task<Option<Exercise>> GetById(ExerciseId id, CancellationToken cancellationToken);
+    Task<Option<Exercise>> GetByName(string name, CancellationToken cancellationToken);
     Task<Exercise> Add(Exercise exercise, CancellationToken cancellationToken);
     Task<Exercise> Update(Exercise exercise, CancellationToken cancellationToken);
     Task Delete(Exercise exercise, CancellationToken cancellationToken);
