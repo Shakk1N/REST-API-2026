@@ -2,14 +2,19 @@ name: .NET CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build-and-test:
-    name: Build & Test
+    name: Build & Test (${{ matrix.lab }})
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        lab: [Lab-01, Lab-02]
 
     services:
       postgres:
@@ -32,13 +37,13 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: "10.0.x"
 
       - name: Restore dependencies
-        run: dotnet restore Lab-01/Exercise.sln
+        run: dotnet restore ${{ matrix.lab }}/Exercise.sln
 
       - name: Build solution
-        run: dotnet build Lab-01/Exercise.sln --configuration Release --no-restore
+        run: dotnet build ${{ matrix.lab }}/Exercise.sln --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test Lab-01/Exercise.sln --configuration Release --no-build --verbosity normal
+        run: dotnet test ${{ matrix.lab }}/Exercise.sln --configuration Release --no-build --verbosity normal
