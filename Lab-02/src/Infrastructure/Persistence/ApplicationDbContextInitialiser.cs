@@ -5,7 +5,8 @@ namespace Infrastructure.Persistence;
 
 public class ApplicationDbContextInitialiser(
     ILogger<ApplicationDbContextInitialiser> logger,
-    ApplicationDbContext dbContext)
+    ApplicationDbContext dbContext
+)
 {
     public async Task InitialiseAsync()
     {
@@ -20,4 +21,3 @@ public class ApplicationDbContextInitialiser(
         }
     }
 }
-

@@ -6,6 +6,5 @@ public enum MuscleGroup
     Back,
     Legs,
     Arms,
-    Shoulders
-    
+    Shoulders,
 }

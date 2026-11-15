@@ -6,7 +6,10 @@ namespace Infrastructure;
 
 public static class ConfigureInfrastructureServices
 {
-    public static void AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+    public static void AddInfrastructureServices(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
         services.AddPersistenceServices(configuration);
     }
