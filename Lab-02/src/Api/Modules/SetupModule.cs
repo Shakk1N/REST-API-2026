@@ -6,7 +6,7 @@ public static class SetupModule
 {
     public static void SetupServices(this IServiceCollection services)
     {
-        services.AddControllers();
+        services.AddControllers(options => options.Filters.Add<ValidationExceptionFilter>());
         services.AddCors();
     }
 
@@ -14,16 +14,12 @@ public static class SetupModule
     {
         services.AddCors(options =>
             options.AddDefaultPolicy(policy =>
-                policy.SetIsOriginAllowed(_ => true)
+                policy
+                    .SetIsOriginAllowed(_ => true)
                     .AllowAnyHeader()
                     .AllowAnyMethod()
-                    .AllowCredentials()));
-    }
-
-    public static void SetupServices(this IServiceCollection services)
-    {
-        services.AddControllers(options => options.Filters.Add<ValidationExceptionFilter>());
-        services.AddCors();
+                    .AllowCredentials()
+            )
+        );
     }
 }
-

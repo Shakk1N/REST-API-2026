@@ -9,11 +9,12 @@ public record ExerciseDto(
     decimal CaloriesPerHour,
     bool RequiresEquipment,
     MuscleGroup MuscleGroup,
-    DateTime CreatedAt)
+    DateTime CreatedAt
+)
 {
     public static ExerciseDto FromDomainModel(Exercise exercise) =>
         new(
-            exercise.Id,
+            exercise.Id.Value,
             exercise.Name,
             exercise.CaloriesPerHour,
             exercise.RequiresEquipment,
@@ -23,15 +24,15 @@ public record ExerciseDto(
 }
 
 public record CreateExerciseDto(
-     string Name,
-     decimal CaloriesPerHour,
-     bool RequiresEquipment,
-     MuscleGroup MuscleGroup
+    string Name,
+    decimal CaloriesPerHour,
+    bool RequiresEquipment,
+    MuscleGroup MuscleGroup
 );
 
 public record UpdateExerciseDto(
-     string Name,
-     decimal CaloriesPerHour,
-     bool RequiresEquipment,
-     MuscleGroup MuscleGroup
+    string Name,
+    decimal CaloriesPerHour,
+    bool RequiresEquipment,
+    MuscleGroup MuscleGroup
 );

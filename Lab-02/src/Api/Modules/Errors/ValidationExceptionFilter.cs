@@ -13,8 +13,8 @@ public class ValidationExceptionFilter : IExceptionFilter
             return;
         }
 
-        var errors = exception.Errors
-            .GroupBy(x => x.PropertyName)
+        var errors = exception
+            .Errors.GroupBy(x => x.PropertyName)
             .ToDictionary(x => x.Key, x => x.Select(e => e.ErrorMessage).ToArray());
 
         context.Result = new BadRequestObjectResult(new ValidationProblemDetails(errors));
