@@ -87,13 +87,4 @@ public class ExercisesController(ISender sender, IExerciseQueries exerciseQuerie
         );
     }
 
-    [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> DeleteExercise(Guid id, CancellationToken cancellationToken)
-    {
-        var command = new DeleteExerciseCommand { ExerciseId = id };
-
-        var result = await sender.Send(command, cancellationToken);
-
-        return result.Match<IActionResult>(_ => NoContent(), error => error.ToObjectResult());
-    }
 }
