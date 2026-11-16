@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        lab: [Lab-01, Lab-02]
+        lab: [Lab-01, Lab-02, control-work-1]
 
     services:
       postgres:
