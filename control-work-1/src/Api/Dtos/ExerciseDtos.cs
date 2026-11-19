@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Domain.Exercises;
 
 namespace Api.Dtos;
