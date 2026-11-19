@@ -87,4 +87,23 @@ public class ExercisesController(ISender sender, IExerciseQueries exerciseQuerie
         );
     }
 
+    [HttpPost("filter")]
+    public async Task<ActionResult<IReadOnlyList<ExerciseDto>>> Filter(
+        [FromBody] SearchExerciseDto request,
+        CancellationToken cancellationToken
+    )
+    {
+        var exercises = await exerciseQueries.Filter(
+            request.Name,
+            request.CaloriesPerHourFrom,
+            request.CaloriesPerHourTo,
+            request.RequiresEquipment,
+            request.MuscleGroup,
+            request.CreatedAtFrom,
+            request.CreatedAtTo,
+            cancellationToken
+        );
+
+        return Ok(exercises.Select(ExerciseDto.FromDomainModel).ToList());
+    }
 }

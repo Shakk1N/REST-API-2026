@@ -35,3 +35,13 @@ public record UpdateExerciseDto(
     bool RequiresEquipment,
     MuscleGroup MuscleGroup
 );
+
+public record SearchExerciseDto(
+    string? Name,
+    decimal? CaloriesPerHourFrom,
+    decimal? CaloriesPerHourTo,
+    bool? RequiresEquipment,
+    MuscleGroup? MuscleGroup,
+    DateTime? CreatedAtFrom,
+    DateTime? CreatedAtTo
+);
