@@ -1,37 +1,90 @@
-# Лабораторна робота №1. Web API на ASP.NET Core з багатошаровою архітектурою
+# Контрольна робота №1 — Web API на ASP.NET Core з багатошаровою архітектурою
 
 ## Тема: Спортзал (Сутність: `Exercise`)
 
-# Мета роботи:
+## Мета роботи
 
-### Навчитися розділяти операції запису (команди) та читання (запити) за принципом CQRS.
-
-### Опанувати MediatR: команди, обробники та конвеєр обробки запиту (pipeline behaviours).
-
-### Перенести валідацію вхідних даних у шар Application за допомогою FluentValidation.
-
-### Зрозуміти, навіщо повертати помилки як значення ( Option<T> , Either<L,R> з LanguageExt), а не через null і винятки.
-
-### Запровадити строго типізовані ідентифікатори сутностей.
+Самостійно створити Web API для власної предметної області, застосувавши підходи, розглянуті на заняттях: поділ рішення на шари (Domain, Application, Infrastructure, Api), роботу з базою даних через EF Core, CQRS-підхід із MediatR, валідацію вхідних даних за допомогою FluentValidation, функціональну обробку помилок за допомогою LanguageExt та типізовані ідентифікатори.
 
 ---
 
-| Step | Action                                    | Method / URL             | Expected HTTP code |                    Actual result                    |
-| ---- | ----------------------------------------- | ------------------------ | :----------------: | :-------------------------------------------------: |
-| 1    | Get the list of exercises at the start    | `GET /exercises`         |       200 OK       |             `200 OK` (empty list `[]`)              |
-| 2    | Try to get a non-existent exercise        | `GET /exercises/{guid}`  |   404 Not Found    |                   `404 Not Found`                   |
-| 3    | Create a new valid exercise               | `POST /exercises`        |    201 Created     |    `201 Created` (`Location` header + DTO body)     |
-| 4    | Try to create a duplicate by name         | `POST /exercises`        |    409 Conflict    |                   `409 Conflict`                    |
-| 5    | Try to create an invalid exercise         | `POST /exercises`        |  400 Bad Request   |    `400 Bad Request` (list of validation errors)    |
-| 6    | Successfully update an exercise           | `PUT /exercises/{id}`    |       200 OK       |              `200 OK` (updated fields)              |
-| 7    | Delete an exercise                        | `DELETE /exercises/{id}` |   204 No Content   |                  `204 No Content`                   |
-| 8    | Try to update a non-existent exercise     | `PUT /exercises/{guid}`  |   404 Not Found    | `404 Not Found` (`Exercise not found under id ...`) |
-| 9    | Try to delete an already deleted exercise | `DELETE /exercises/{id}` |   404 Not Found    |                   `404 Not Found`                   |
+## Технології
+
+- **Платформа:** .NET 10, ASP.NET Core Web API (контролери)
+- **СУБД:** PostgreSQL
+- **ORM:** Entity Framework Core 10 + Npgsql
+- **CQRS / Mediator:** MediatR 14
+- **Валідація:** FluentValidation 12
+- **Функціональна обробка помилок:** LanguageExt 4 (`Option<T>`, `Either<L, R>`)
+- **Документація API:** Swagger (Swashbuckle)
+
+---
+
+## Архітектура рішення
+
+Рішення складається з чотирьох проєктів із залежностями, спрямованими всередину:
 
 ```
-Build started...
-Build succeeded.
-No changes have been made to the model since the last migration.
+Api → Infrastructure → Application → Domain
 ```
 
-![alt text](docs/images/mermaid-diagram-2026-11-15-204832.png)
+| Проєкт           | Відповідальність                                                                 |
+| ---------------- | -------------------------------------------------------------------------------- |
+| `Domain`         | Сутність `Exercise`, типізований `ExerciseId`, перелік `MuscleGroup`             |
+| `Application`    | Команди MediatR, валідатори, інтерфейси репозиторію та запитів, ієрархія помилок |
+| `Infrastructure` | EF Core, PostgreSQL, репозиторій, конфігурація, міграції                         |
+| `Api`            | Контролер, DTO, обробка помилок → HTTP-коди, Swagger, CORS                       |
+
+---
+
+## Структура проєкту
+
+```
+control-work-1/
+└── src/
+    ├── Domain/
+    │   └── Exercises/
+    │       ├── Exercise.cs          # Сутність (інкапсульована, фабричний метод)
+    │       ├── ExerciseId.cs        # Типізований ідентифікатор (record + Guid)
+    │       └── MuscleGroup.cs       # Enum: Chest, Back, Legs, Arms, Shoulders
+    ├── Application/
+    │   ├── Common/
+    │   │   ├── Behaviours/
+    │   │   │   └── ValidationBehaviour.cs   # MediatR pipeline — запуск валідаторів
+    │   │   └── Interfaces/
+    │   │       ├── Queries/
+    │   │       │   └── IExerciseQueries.cs  # GetAll, GetById → Option<T>
+    │   │       └── Repositories/
+    │   │           └── IExerciseRepository.cs # GetById, GetByName, Add, Update
+    │   └── Exercises/
+    │       ├── Commands/
+    │       │   ├── CreateExerciseCommand.cs          # Команда + обробник
+    │       │   ├── CreateExerciseCommandValidator.cs  # Валідатор FluentValidation
+    │       │   ├── UpdateExerciseCommand.cs          # Команда + обробник
+    │       │   └── UpdateExerciseCommandValidator.cs  # Валідатор FluentValidation
+    │       └── Exceptions/
+    │           └── ExerciseExceptions.cs  # AlreadyExists, NotFound, Unhandled
+    ├── Infrastructure/
+    │   ├── Migrations/              # EF Core міграції
+    │   └── Persistence/
+    │       ├── ApplicationDbContext.cs
+    │       ├── ApplicationDbContextInitialiser.cs   # Автозастосування міграцій
+    │       ├── Configurations/
+    │       │   └── ExerciseConfiguration.cs         # IEntityTypeConfiguration
+    │       ├── Converters/
+    │       │   └── DateTimeUtcConverter.cs          # UTC-конвертер для дат
+    │       ├── Repositories/
+    │       │   └── ExerciseRepository.cs            # IExerciseRepository + IExerciseQueries
+    │       └── ConfigurePersistenceServices.cs
+    └── Api/
+        ├── Controllers/
+        │   └── ExercisesController.cs   # GET/POST/PUT ендпоїнти
+        ├── Dtos/
+        │   └── ExerciseDtos.cs          # ExerciseDto, CreateExerciseDto, UpdateExerciseDto
+        └── Modules/
+            ├── Errors/
+            │   ├── ExerciseErrorFactory.cs      # Помилки → HTTP 409/404/500
+            │   └── ValidationExceptionFilter.cs # FluentValidation → HTTP 400
+            ├── DbModule.cs      # Розширення для InitialiseDatabaseAsync
+            └── SetupModule.cs   # CORS, контролери, фільтри
+```
